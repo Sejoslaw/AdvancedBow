@@ -1,11 +1,10 @@
 package com.github.sejoslaw.advancedbow;
 
-import com.google.common.collect.Multimap;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
@@ -22,9 +21,15 @@ public class ItemAdvancedBow extends BowItem {
     @ObjectHolder("advancedbow:advancedbow")
     public static ItemAdvancedBow ITEM;
 
-    // Advanced Bow Properties
-    private int strength = 1;
-    private float arrowVelocity = 1;
+    public static final String STATS_LEVEL = "AdvancedBow_Level";
+    public static final String STATS_STRENGTH = "AdvancedBow_Strength";
+    public static final String STATS_ARROW_VELOCITY = "AdvancedBow_ArrowVelocity";
+    public static final String STATS_EXP = "AdvancedBow_Exp";
+    public static final String STATS_EXP_MAX = "AdvancedBow_Exp_Max";
+
+    public static final String SKILL_BURNING_ARROW = "AdvancedBow_Skill_BurningArrow"; // Level: 25
+    public static final String SKILL_INFINITY = "AdvancedBow_Skill_Infinity"; // Level: 50
+    public static final String SKILL_EXPLODING_ARROW = "AdvancedBow_Skill_ExplodingArrow"; // Level: 75
 
     public ItemAdvancedBow() {
         super(GetAdvancedBowProperties());
@@ -36,39 +41,37 @@ public class ItemAdvancedBow extends BowItem {
         return true;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        // TODO: Add Advanced Bow details and skills
+    public void onCreated(ItemStack stack, World world, PlayerEntity player) {
+        CompoundNBT tag = stack.getOrCreateTag();
 
-        // General informations
+        tag.putInt(STATS_LEVEL, 1);
+        tag.putFloat(STATS_STRENGTH, 1.0F);
+        tag.putFloat(STATS_ARROW_VELOCITY, 1.0F);
+        tag.putInt(STATS_EXP, 0);
+        tag.putInt(STATS_EXP_MAX, 100);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+        CompoundNBT tag = stack.getOrCreateTag();
+
         tooltip.add(new StringTextComponent(""));
         tooltip.add(this.buildHeader("Details:"));
-        tooltip.add(this.buildDetailsRow("  Strength:", this.strength));
-        tooltip.add(this.buildDetailsRow("  Arrow Velocity:", this.arrowVelocity));
+        tooltip.add(this.buildDetailsRow("   Level:", tag.getInt(STATS_STRENGTH)));
 
-        // Skills
+        tooltip.add(new StringTextComponent(
+                getFormattedDetailsText("   Exp: ").getFormattedText() +
+                        getFormattedValueText(tag.getInt(STATS_EXP)).getFormattedText() +
+                        getFormattedDetailsText(" / ").getFormattedText() +
+                        getFormattedValueText(tag.getInt(STATS_EXP_MAX)).getFormattedText()
+        ));
+
+        tooltip.add(this.buildDetailsRow("   Strength:", tag.getFloat(STATS_STRENGTH)));
+        tooltip.add(this.buildDetailsRow("   Arrow Velocity:", tag.getFloat(STATS_ARROW_VELOCITY)));
+
+        tooltip.add(new StringTextComponent(""));
+        tooltip.add(this.buildHeader("Skills:"));
     }
-
-    public Multimap<String, AttributeModifier> getAttributeModifiers(EquipmentSlotType equipmentSlot) {
-        Multimap<String, AttributeModifier> multimap = super.getAttributeModifiers(equipmentSlot);
-
-        // TODO: Add modifiers
-
-        return multimap;
-    }
-
-    /**
-     * Called when the player stops using an Item (stops holding the right mouse button).
-     */
-//    public void onPlayerStoppedUsing(ItemStack stack, World worldIn, LivingEntity entityLiving, int timeLeft) {
-//    }
-
-    /**
-     * Called to trigger the item's "innate" right click behavior. To handle when this item is used on a Block, see
-     * {@link #onItemUse}.
-     */
-//    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-//    }
 
     private ITextComponent buildHeader(String text) {
         return new StringTextComponent(text)
@@ -78,9 +81,17 @@ public class ItemAdvancedBow extends BowItem {
     }
 
     private ITextComponent buildDetailsRow(String text, Object value) {
-        ITextComponent textComponent = new StringTextComponent(text).setStyle(new Style().setColor(TextFormatting.GREEN));
-        ITextComponent valueComponent = new StringTextComponent(value.toString()).setStyle(new Style().setColor(TextFormatting.YELLOW));
+        ITextComponent textComponent = getFormattedDetailsText(text);
+        ITextComponent valueComponent = getFormattedValueText(value);
         return new StringTextComponent(textComponent.getFormattedText() + " " + valueComponent.getFormattedText());
+    }
+
+    private ITextComponent getFormattedDetailsText(String text) {
+        return new StringTextComponent(text).setStyle(new Style().setColor(TextFormatting.GREEN));
+    }
+
+    private ITextComponent getFormattedValueText(Object value) {
+        return new StringTextComponent(value.toString()).setStyle(new Style().setColor(TextFormatting.YELLOW));
     }
 
     private static Properties GetAdvancedBowProperties() {
