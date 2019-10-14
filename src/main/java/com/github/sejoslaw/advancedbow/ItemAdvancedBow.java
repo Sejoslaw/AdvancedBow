@@ -94,9 +94,18 @@ public class ItemAdvancedBow extends BowItem {
         return new StringTextComponent(value.toString()).setStyle(new Style().setColor(TextFormatting.YELLOW));
     }
 
+    public static void setMaxStats(CompoundNBT tag) {
+        tag.putInt(STATS_LEVEL, Integer.MAX_VALUE - 2);
+        tag.putFloat(STATS_STRENGTH, Float.MAX_VALUE);
+        tag.putFloat(STATS_ARROW_VELOCITY, Float.MAX_VALUE);
+        tag.putInt(STATS_EXP, 0);
+        tag.putInt(STATS_EXP_MAX, Integer.MAX_VALUE);
+    }
+
     private static Properties GetAdvancedBowProperties() {
         Properties properties = new Properties()
-                .maxStackSize(1);
+                .maxStackSize(1)
+                .group(AdvancedBowItemGroup.ITEM_GROUP);
         return properties;
     }
 }

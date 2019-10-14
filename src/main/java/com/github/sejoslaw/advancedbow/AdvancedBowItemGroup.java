@@ -2,7 +2,9 @@ package com.github.sejoslaw.advancedbow;
 
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -17,11 +19,14 @@ public class AdvancedBowItemGroup {
             // Normal Advanced Bow
             items.add(new ItemStack(ItemAdvancedBow.ITEM));
 
-            // Bows with skills
+            // Maxed Advanced Bow
+            ItemStack bowWithSkills = new ItemStack(ItemAdvancedBow.ITEM);
+            bowWithSkills.setDisplayName(new StringTextComponent("Maxed Advanced Bow"));
 
-            // Bow with all the skills
+            CompoundNBT tag = bowWithSkills.getOrCreateTag();
+            ItemAdvancedBow.setMaxStats(tag);
 
-            // Bow with skills and high values
+            items.add(bowWithSkills);
         }
     };
 }
